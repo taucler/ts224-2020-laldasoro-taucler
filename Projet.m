@@ -45,28 +45,31 @@ mu = 0;
 RSB = [-5,0,10]; %rapport signal sur bruit
 Ps = sum(abs(X))/N; %puissance signal x(t)
 R = randn(N,1);
+noise = [zeros(5000,1), zeros(5000,1), zeros(5000,1)];
+lgd_RSB = ["-5 dB", "0 dB", "10 dB"];
 
-for i=1:3
+for i = 1:3
     sig(i) = sqrt(Ps * 10^(-RSB(i)/10));
-    noise(i) = mu + sig(i)*R;
+    noise(:,i) = mu + sig(i)*R;
 
-y = x + noise; %signal bruité
+    y = x + noise(:,i); %signal bruité
+    
+    Y = fftshift(fft(y)).^2/N;
+    DSP_y = abs(H).^2;
 
-Y = fftshift(fft(y)).^2/N;
-DSP_y = abs(H).^2;
-
-figure
-subplot 211
-plot(y); 
-title("Représentation temporelle du signal bruité");
-ylabel('Amplitude');
-
-subplot 212
-plot(f,abs(Y));
-hold on;
-plot(f,DSP_y,'LineWidth',2);
-title("Spectre et densité spectrale de puissance");
-xlabel('Fréquence normalisée');
-ylabel('Amplitude');
-
+    
+    figure
+    subplot 211
+    plot(y);
+    title(sprintf('Représentation temporelle du signal bruité (RSB = %s)', lgd_RSB(i)));
+    ylabel('Amplitude');
+    
+    subplot 212
+    plot(f,abs(Y));
+    hold on;
+    plot(f,DSP_y,'LineWidth',2);
+    title(sprintf('Spectre et densité spectrale de puissance (RSB = %s)', lgd_RSB(i)));
+    xlabel('Fréquence normalisée');
+    ylabel('Amplitude');
+   
 end
